@@ -1,0 +1,8 @@
+std_msgs/Float64 amplitude
+std_msgs/Float64 frequency
+int32 num_cycles
+---
+bool success
+std_msgs/Float64 velocity
+---
+int32 fdbk
