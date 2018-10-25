@@ -20,6 +20,11 @@ using namespace std; // avoids having to say: std::string, std::cout, etc
 #include <trajectory_msgs/JointTrajectory.h>
 #include<sensor_msgs/JointState.h>
 
+//add these to use the "magic" object finder action server
+#include <actionlib/client/simple_action_client.h>
+#include <actionlib/client/terminal_state.h>
+#include <magic_object_finder/magicObjectFinderAction.h>
+
 //the following will be useful when need tool transforms
 //#include <tf/transform_listener.h>
 //#include <xform_utils/xform_utils.h>
