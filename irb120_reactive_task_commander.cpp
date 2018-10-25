@@ -261,7 +261,7 @@ int main(int argc, char** argv) {
       //xxxxxxxxxxxxxxxxxx
 
        //manually prescribed flange pose; in the  future, compute this based  on perception
-      if (gearGoalX - g_perceived_object_pose.pose.position.x > 0) {
+      if (gearGoalX - abs(g_perceived_object_pose.pose.position.x) > 0) {
        flange_origin << g_perceived_object_pose.pose.position.x - 0.05, g_perceived_object_pose.pose.position.y, 0.01;
       }
       else {
@@ -288,7 +288,7 @@ int main(int argc, char** argv) {
       ROS_INFO("done with second trajectory");
       //xxxxxxxxxxxxxxxxx
 
-      if (gearGoalX - g_perceived_object_pose.pose.position.x > 0) {
+      if (gearGoalX - abs(g_perceived_object_pose.pose.position.x) > 0) {
         flange_origin << g_perceived_object_pose.pose.position.x + 0.05, g_perceived_object_pose.pose.position.y, 0.01;
       }
       else {
@@ -314,7 +314,7 @@ int main(int argc, char** argv) {
       ROS_INFO("done with third trajectory");
       //xxxxxxxxxxxxxxxxxx
 
-      if (gearGoalX - g_perceived_object_pose.pose.position.x > 0) {
+      if (gearGoalX - abs(g_perceived_object_pose.pose.position.x) > 0) {
         flange_origin << g_perceived_object_pose.pose.position.x + 0.05, g_perceived_object_pose.pose.position.y, 0.5;
       }
       else {
@@ -364,7 +364,7 @@ int main(int argc, char** argv) {
 
 
           goal_flange_affine.linear() = R_down;
-          if (gearGoalY - g_perceived_object_pose.pose.position.y > 0) {
+          if (gearGoalY - abs(g_perceived_object_pose.pose.position.y) > 0) {
             flange_origin << g_perceived_object_pose.pose.position.x, g_perceived_object_pose.pose.position.y - 0.1, 0.5;
           }
           else {
@@ -399,7 +399,7 @@ int main(int argc, char** argv) {
           //xxxxxxxxxxxxxxxxxx
 
            //manually prescribed flange pose; in the  future, compute this based  on perception
-           if (gearGoalY - g_perceived_object_pose.pose.position.y > 0) {
+           if (gearGoalY - abs(g_perceived_object_pose.pose.position.y) > 0) {
              flange_origin << g_perceived_object_pose.pose.position.x, g_perceived_object_pose.pose.position.y - 0.1, 0.01;
            }
            else {
@@ -426,7 +426,7 @@ int main(int argc, char** argv) {
           ROS_INFO("done with second trajectory");
           //xxxxxxxxxxxxxxxxx
 
-          if (gearGoalY - g_perceived_object_pose.pose.position.y > 0) {
+          if (gearGoalY - abs(g_perceived_object_pose.pose.position.y) > 0) {
             flange_origin << g_perceived_object_pose.pose.position.x, g_perceived_object_pose.pose.position.y + 0.1, 0.01;
           }
           else {
@@ -452,7 +452,7 @@ int main(int argc, char** argv) {
           ROS_INFO("done with third trajectory");
           //xxxxxxxxxxxxxxxxxx
 
-          if (gearGoalY - g_perceived_object_pose.pose.position.y > 0) {
+          if (gearGoalY - abs(g_perceived_object_pose.pose.position.y) > 0) {
             flange_origin << g_perceived_object_pose.pose.position.x, g_perceived_object_pose.pose.position.y + 0.1, 0.5;
           }
           else {
