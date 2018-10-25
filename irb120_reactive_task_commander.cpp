@@ -168,14 +168,14 @@ int main(int argc, char** argv) {
     optimal_path.push_back(g_q_vec_arm_Xd); //start from current pose
     optimal_path.push_back(g_q_vec_arm_Xd); // go from current pose to current pose--not very useful; but can "warm up" control
     //publish/subscribe interface
-    arrival_time = 0.1; //move should require zero time, but provide something small
+    arrival_time = 1; //move should require zero time, but provide something small
 
     //function call from library (Class) CartTrajPlanner: converts a joint-space path to a joint-space trajectory
     pCartTrajPlanner->path_to_traj(optimal_path, arrival_time, new_trajectory);
-    //print_traj(new_trajectory); //display for  debug
+    print_traj(new_trajectory); //display for  debug
 
     traj_publisher.publish(new_trajectory); //publish the trajectory;
-    ros::Duration(0.2).sleep();
+    ros::Duration(1).sleep();
 
     //example to show how to use forward kinematics from the class pointers provided
     start_flange_affine = pFwdSolver->fwd_kin_solve(g_q_vec_arm_Xd);
