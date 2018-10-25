@@ -38,6 +38,7 @@ std::vector<double> g_planner_joint_weights{3, 3, 2, 1, 1, 0.5}; //specify weigh
 string g_object_name("gear_part_ariac");  //hard-coded object name; edit this for different objects
 int g_found_object_code; //global to communicate between callback and main: true if named object was found
 geometry_msgs::PoseStamped g_perceived_object_pose; //global to communicate between callback and main: pose  of found object
+ros::Publisher *g_pose_publisher; //make this global so callback can access it--for displaying object frames in rviz
 
 using namespace std;
 
@@ -202,8 +203,8 @@ int main(int argc, char** argv) {
     }
 
     int attempts = 0;
-    double xOffset = abs(g_perceived_object_pose.pose.position.x - gearGoal.x)
-    double yOffset = abs(g_perceived_object_pose.pose.position.y - gearGoal.y)
+    double xOffset = abs(g_perceived_object_pose.pose.position.x - gearGoal.data.x);
+    double yOffset = abs(g_perceived_object_pose.pose.position.y - gearGoal.data.y);
 
     while (attempts < 3 || (xOffset > 0.05 && yOffset > 0.05)) {
       //xxxxxxxxxxxxxx  the following makes an inquiry for the pose of the part of interest
@@ -228,7 +229,7 @@ int main(int argc, char** argv) {
 
 
       goal_flange_affine.linear() = R_down;
-      if (gearGoal.x - g_perceived_object_pose.pose.position.x > 0) {
+      if (gearGoal.data.x - g_perceived_object_pose.pose.position.x > 0) {
         flange_origin << g_perceived_object_pose.pose.position.x - 0.1, g_perceived_object_pose.pose.position.y, 0.5;
       }
       else {
