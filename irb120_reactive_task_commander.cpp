@@ -52,7 +52,7 @@ void print_affines(std::vector<Eigen::Affine3d> affine_path) {
     int npts = affine_path.size();
     ROS_INFO("affine path, origins only: ");
     for (int i = 0; i < npts; i++) {
-        cout << affine_path[i].translation().transpose() << endl;
+      //  cout << affine_path[i].translation().transpose() << endl;
     }
 }
 
@@ -67,9 +67,9 @@ void print_traj(trajectory_msgs::JointTrajectory des_trajectory) {
     for (int i = 0; i < npts; i++) {
         //jspace_pt=optimal_path[i];
         for (int j = 0; j < njnts; j++) {
-            cout << (des_trajectory.points[i]).positions[j] << ", ";
+        //    cout << (des_trajectory.points[i]).positions[j] << ", ";
         }
-        cout << "; t = " << des_trajectory.points[i].time_from_start.toSec() << endl;
+        //cout << "; t = " << des_trajectory.points[i].time_from_start.toSec() << endl;
 
     }
 }
