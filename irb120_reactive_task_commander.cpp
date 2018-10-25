@@ -203,6 +203,7 @@ int main(int argc, char** argv) {
     double yOffset = abs(g_perceived_object_pose.pose.position.y - gearGoalY);
 
     while (attempts < 3 || (xOffset > 0.05 && yOffset > 0.05)) {
+      ROS_INFO("two made here");
       //xxxxxxxxxxxxxx  the following makes an inquiry for the pose of the part of interest
       //specify the part name, send it in the goal message, wait for and interpret the result
       object_finder_goal.object_name = g_object_name.c_str(); //convert string object to old C-style string data
