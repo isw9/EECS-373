@@ -142,7 +142,7 @@ int main(int argc, char** argv) {
     R_down.col(1) = y_axis;
     R_down.col(2) = z_axis;
     flange_origin << 0.2, 0, 0.01;
-    int nsteps = 5; //will need to specify how many interpolation points in Cartesian path
+    int nsteps = 100; //will need to specify how many interpolation points in Cartesian path
     double arrival_time = 5.0; //will  need to specify arrival time for a Cartesian path
 
     //for this next line, I apparently did something wrong.  I should not have to  instantiate a cartesianInterpolator,
