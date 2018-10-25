@@ -172,7 +172,7 @@ int main(int argc, char** argv) {
 
     //function call from library (Class) CartTrajPlanner: converts a joint-space path to a joint-space trajectory
     pCartTrajPlanner->path_to_traj(optimal_path, arrival_time, new_trajectory);
-    print_traj(new_trajectory); //display for  debug
+    //print_traj(new_trajectory); //display for  debug
 
     traj_publisher.publish(new_trajectory); //publish the trajectory;
     ros::Duration(1).sleep();
