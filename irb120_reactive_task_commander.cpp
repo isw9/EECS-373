@@ -34,6 +34,11 @@ using namespace std; // avoids having to say: std::string, std::cout, etc
 CartTrajPlanner *pCartTrajPlanner; //does  not  have to be global, unless needed by other functions
 std::vector<double> g_planner_joint_weights{3, 3, 2, 1, 1, 0.5}; //specify weights to use for planner optimization
 
+//another magic value: hard-coded name of object of interest
+string g_object_name("gear_part_ariac");  //hard-coded object name; edit this for different objects
+int g_found_object_code; //global to communicate between callback and main: true if named object was found
+geometry_msgs::PoseStamped g_perceived_object_pose; //global to communicate between callback and main: pose  of found object
+
 using namespace std;
 
 //arm pose in joint space; the only reason this is global is that it will be useful, in the future, for it
@@ -493,8 +498,8 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    xOffset = abs(g_perceived_object_pose.pose.position.x - gearGoal.x)
-    yOffset = abs(g_perceived_object_pose.pose.position.y - gearGoal.y)
+    xOffset = abs(g_perceived_object_pose.pose.position.x - gearGoal.x);
+    yOffset = abs(g_perceived_object_pose.pose.position.y - gearGoal.y);
     attempts++;
   }
 }
