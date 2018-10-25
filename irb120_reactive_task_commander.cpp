@@ -227,10 +227,10 @@ int main(int argc, char** argv) {
 
       goal_flange_affine.linear() = R_down;
       if (gearGoalX - g_perceived_object_pose.pose.position.x > 0) {
-        flange_origin << g_perceived_object_pose.pose.position.x - 0.1, g_perceived_object_pose.pose.position.y, 0.5;
+        flange_origin << g_perceived_object_pose.pose.position.x - 0.05, g_perceived_object_pose.pose.position.y, 0.5;
       }
       else {
-        flange_origin << g_perceived_object_pose.pose.position.x + 0.1, g_perceived_object_pose.pose.position.y, 0.5;
+        flange_origin << g_perceived_object_pose.pose.position.x + 0.05, g_perceived_object_pose.pose.position.y, 0.5;
       }
       //set the  goal orientation for flange to point down; will not need to change this for now
       //specify coordinates for the desired flange position (origin) with respect to the robot's base frame
@@ -262,10 +262,10 @@ int main(int argc, char** argv) {
 
        //manually prescribed flange pose; in the  future, compute this based  on perception
       if (gearGoalX - g_perceived_object_pose.pose.position.x > 0) {
-       flange_origin << g_perceived_object_pose.pose.position.x - 0.1, g_perceived_object_pose.pose.position.y, 0.01;
+       flange_origin << g_perceived_object_pose.pose.position.x - 0.05, g_perceived_object_pose.pose.position.y, 0.01;
       }
       else {
-        flange_origin << g_perceived_object_pose.pose.position.x + 0.1, g_perceived_object_pose.pose.position.y, 0.01;
+        flange_origin << g_perceived_object_pose.pose.position.x + 0.05, g_perceived_object_pose.pose.position.y, 0.01;
       }
       goal_flange_affine.translation() = flange_origin;
       ROS_INFO_STREAM("move to flange origin: " << goal_flange_affine.translation().transpose() << endl);
@@ -289,10 +289,10 @@ int main(int argc, char** argv) {
       //xxxxxxxxxxxxxxxxx
 
       if (gearGoalX - g_perceived_object_pose.pose.position.x > 0) {
-        flange_origin << g_perceived_object_pose.pose.position.x + 0.1, g_perceived_object_pose.pose.position.y, 0.01;
+        flange_origin << g_perceived_object_pose.pose.position.x + 0.05, g_perceived_object_pose.pose.position.y, 0.01;
       }
       else {
-        flange_origin << g_perceived_object_pose.pose.position.x - 0.1, g_perceived_object_pose.pose.position.y, 0.01;
+        flange_origin << g_perceived_object_pose.pose.position.x - 0.05, g_perceived_object_pose.pose.position.y, 0.01;
       }
       goal_flange_affine.translation() = flange_origin;
       ROS_INFO_STREAM("move to flange origin: " << goal_flange_affine.translation().transpose() << endl);
@@ -315,10 +315,10 @@ int main(int argc, char** argv) {
       //xxxxxxxxxxxxxxxxxx
 
       if (gearGoalX - g_perceived_object_pose.pose.position.x > 0) {
-        flange_origin << g_perceived_object_pose.pose.position.x + 0.1, g_perceived_object_pose.pose.position.y, 0.5;
+        flange_origin << g_perceived_object_pose.pose.position.x + 0.05, g_perceived_object_pose.pose.position.y, 0.5;
       }
       else {
-        flange_origin << g_perceived_object_pose.pose.position.x - 0.1, g_perceived_object_pose.pose.position.y, 0.5;
+        flange_origin << g_perceived_object_pose.pose.position.x - 0.05, g_perceived_object_pose.pose.position.y, 0.5;
       }
       goal_flange_affine.translation() = flange_origin;
       ROS_INFO_STREAM("move to flange origin: " << goal_flange_affine.translation().transpose() << endl);
