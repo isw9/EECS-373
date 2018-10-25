@@ -227,6 +227,8 @@ int main(int argc, char** argv) {
 
       goal_flange_affine.linear() = R_down;
       if (gearGoalX - g_perceived_object_pose.pose.position.x > 0) {
+        ROS_INFO("X VALUE IS: %f", g_perceived_object_pose.pose.position.x);
+        ROS_INFO("Y VALUE IS: %f", g_perceived_object_pose.pose.position.y);
         flange_origin << g_perceived_object_pose.pose.position.x - 0.05, g_perceived_object_pose.pose.position.y, 0.5;
       }
       else {
