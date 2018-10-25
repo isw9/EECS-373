@@ -127,13 +127,14 @@ int main(int argc, char** argv) {
     g_pose_publisher = &pose_publisher;
     magic_object_finder::magicObjectFinderGoal object_finder_goal; //instantiate goal message to communicate with magic_object_finder
 
+    double gearGoalX = 0.3;
+    double gearGoalY = 0.35;
+
     //the following is an std::vector of affines.  It describes a path in Cartesian coords, including orientations
     //not needed yet; is constructed inside the generic planner by interpolation
     //std::vector<Eigen::Affine3d> affine_path;
     Eigen::Matrix3d R_down; //define an orientataion corresponding to toolflange pointing down
-    Eigen::Vector3d x_axis, y_axis, z_axis, flange_origin, gearLocation;
-    double gearGoalX = 0.3;
-    double gearGoalY = 0.35;
+    Eigen::Vector3d x_axis, y_axis, z_axis, flange_origin;
     z_axis << 0, 0, -1; //points flange down
     x_axis << -1, 0, 0; //arbitrary
     y_axis = z_axis.cross(x_axis); //construct y-axis consistent with right-hand coordinate frame
@@ -168,20 +169,48 @@ int main(int argc, char** argv) {
     optimal_path.push_back(g_q_vec_arm_Xd); //start from current pose
     optimal_path.push_back(g_q_vec_arm_Xd); // go from current pose to current pose--not very useful; but can "warm up" control
     //publish/subscribe interface
-    arrival_time = 1; //move should require zero time, but provide something small
+    arrival_time = 0.1; //move should require zero time, but provide something small
 
     //function call from library (Class) CartTrajPlanner: converts a joint-space path to a joint-space trajectory
     pCartTrajPlanner->path_to_traj(optimal_path, arrival_time, new_trajectory);
-    //print_traj(new_trajectory); //display for  debug
+    print_traj(new_trajectory); //display for  debug
 
     traj_publisher.publish(new_trajectory); //publish the trajectory;
-    ros::Duration(1).sleep();
+    ros::Duration(0.2).sleep();
 
     //example to show how to use forward kinematics from the class pointers provided
     start_flange_affine = pFwdSolver->fwd_kin_solve(g_q_vec_arm_Xd);
     //display the flange affine corresponding to the specfied arm angles
     ROS_INFO_STREAM("fwd soln: origin = " << start_flange_affine.translation().transpose() << endl);
     ROS_INFO_STREAM("fwd soln: orientation: " << endl << start_flange_affine.linear() << endl);
+
+    goal_flange_affine.linear() = R_down; //set the  goal orientation for flange to point down; will not need to change this for now
+    flange_origin << 0.3, 0, 0.5; //specify coordinates for the desired flange position (origin) with respect to the robot's base frame
+    goal_flange_affine.translation() = flange_origin; //make this part of the flange  affine description
+    ROS_INFO_STREAM("move to flange origin: " << goal_flange_affine.translation().transpose() << endl);
+    ROS_INFO_STREAM("with orientation: " << endl << goal_flange_affine.linear() << endl);
+
+    //interpolate from start pose to goal pose with this many samples along Cartesian path
+    nsteps = 5; //arbitrary; tune me
+
+    //compute an optimal joint-space path:
+    optimal_path.clear();
+    //planner will return "false" if unsuccessful; should add error handling
+    //successful result will be a joint-space path in optimal_path
+    if (!pCartTrajPlanner->plan_cartesian_path_w_rot_interp(g_q_vec_arm_Xd, goal_flange_affine,
+            nsteps, optimal_path)) {
+        ROS_WARN("no feasible IK path for specified Cartesian motion; quitting");
+        return 1;
+    }
+    //if here, have a viable joint-space path; convert it to a trajectory:
+    //choose arrival time--to  be  tuned
+    arrival_time = 2.0;
+    pCartTrajPlanner->path_to_traj(optimal_path, arrival_time, new_trajectory);
+    print_traj(new_trajectory);
+    traj_publisher.publish(new_trajectory); //publish the trajectory--this should move  the robot
+    ros::Duration(arrival_time).sleep(); //wait for the motion to complete (dead reckoning)
+    ROS_INFO("done with first trajectory");
+
 
     //xxxxxxxxxxxxxx  the following makes an inquiry for the pose of the part of interest
     //specify the part name, send it in the goal message, wait for and interpret the result
