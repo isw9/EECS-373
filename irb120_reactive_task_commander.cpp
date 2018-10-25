@@ -131,7 +131,9 @@ int main(int argc, char** argv) {
     //not needed yet; is constructed inside the generic planner by interpolation
     //std::vector<Eigen::Affine3d> affine_path;
     Eigen::Matrix3d R_down; //define an orientataion corresponding to toolflange pointing down
-    Eigen::Vector3d x_axis, y_axis, z_axis, flange_origin, gearGoal, gearLocation;
+    Eigen::Vector3d x_axis, y_axis, z_axis, flange_origin, gearLocation;
+    double gearGoalX = 0.3;
+    double gearGoalY = 0.35;
     z_axis << 0, 0, -1; //points flange down
     x_axis << -1, 0, 0; //arbitrary
     y_axis = z_axis.cross(x_axis); //construct y-axis consistent with right-hand coordinate frame
@@ -139,7 +141,6 @@ int main(int argc, char** argv) {
     R_down.col(1) = y_axis;
     R_down.col(2) = z_axis;
     flange_origin << 0.2, 0, 0.01;
-    gearGoal << 0.3, 0.35, 0;
     int nsteps = 5; //will need to specify how many interpolation points in Cartesian path
     double arrival_time = 5.0; //will  need to specify arrival time for a Cartesian path
 
@@ -203,8 +204,8 @@ int main(int argc, char** argv) {
     }
 
     int attempts = 0;
-    double xOffset = abs(g_perceived_object_pose.pose.position.x - gearGoal.data.x);
-    double yOffset = abs(g_perceived_object_pose.pose.position.y - gearGoal.data.y);
+    double xOffset = abs(g_perceived_object_pose.pose.position.x - gearGoalX);
+    double yOffset = abs(g_perceived_object_pose.pose.position.y - gearGoalY);
 
     while (attempts < 3 || (xOffset > 0.05 && yOffset > 0.05)) {
       //xxxxxxxxxxxxxx  the following makes an inquiry for the pose of the part of interest
@@ -229,7 +230,7 @@ int main(int argc, char** argv) {
 
 
       goal_flange_affine.linear() = R_down;
-      if (gearGoal.data.x - g_perceived_object_pose.pose.position.x > 0) {
+      if (gearGoalX - g_perceived_object_pose.pose.position.x > 0) {
         flange_origin << g_perceived_object_pose.pose.position.x - 0.1, g_perceived_object_pose.pose.position.y, 0.5;
       }
       else {
@@ -264,7 +265,7 @@ int main(int argc, char** argv) {
       //xxxxxxxxxxxxxxxxxx
 
        //manually prescribed flange pose; in the  future, compute this based  on perception
-      if (gearGoal.x - g_perceived_object_pose.pose.position.x > 0) {
+      if (gearGoalX - g_perceived_object_pose.pose.position.x > 0) {
        flange_origin << g_perceived_object_pose.pose.position.x - 0.1, g_perceived_object_pose.pose.position.y, 0.01;
       }
       else {
@@ -291,7 +292,7 @@ int main(int argc, char** argv) {
       ROS_INFO("done with second trajectory");
       //xxxxxxxxxxxxxxxxx
 
-      if (gearGoal.x - g_perceived_object_pose.pose.position.x > 0) {
+      if (gearGoalX - g_perceived_object_pose.pose.position.x > 0) {
         flange_origin << g_perceived_object_pose.pose.position.x + 0.1, g_perceived_object_pose.pose.position.y, 0.01;
       }
       else {
@@ -317,7 +318,7 @@ int main(int argc, char** argv) {
       ROS_INFO("done with third trajectory");
       //xxxxxxxxxxxxxxxxxx
 
-      if (gearGoal.x - g_perceived_object_pose.pose.position.x > 0) {
+      if (gearGoalX - g_perceived_object_pose.pose.position.x > 0) {
         flange_origin << g_perceived_object_pose.pose.position.x + 0.1, g_perceived_object_pose.pose.position.y, 0.5;
       }
       else {
@@ -365,7 +366,7 @@ int main(int argc, char** argv) {
 
 
     goal_flange_affine.linear() = R_down;
-    if (gearGoal.y - g_perceived_object_pose.pose.position.y > 0) {
+    if (gearGoalY - g_perceived_object_pose.pose.position.y > 0) {
       flange_origin << g_perceived_object_pose.pose.position.x, g_perceived_object_pose.pose.position.y - 0.1, 0.5;
     }
     else {
@@ -400,7 +401,7 @@ int main(int argc, char** argv) {
     //xxxxxxxxxxxxxxxxxx
 
      //manually prescribed flange pose; in the  future, compute this based  on perception
-     if (gearGoal.y - g_perceived_object_pose.pose.position.y > 0) {
+     if (gearGoalY - g_perceived_object_pose.pose.position.y > 0) {
        flange_origin << g_perceived_object_pose.pose.position.x, g_perceived_object_pose.pose.position.y - 0.1, 0.01;
      }
      else {
@@ -427,7 +428,7 @@ int main(int argc, char** argv) {
     ROS_INFO("done with second trajectory");
     //xxxxxxxxxxxxxxxxx
 
-    if (gearGoal.y - g_perceived_object_pose.pose.position.y > 0) {
+    if (gearGoalY - g_perceived_object_pose.pose.position.y > 0) {
       flange_origin << g_perceived_object_pose.pose.position.x, g_perceived_object_pose.pose.position.y + 0.1, 0.01;
     }
     else {
@@ -453,7 +454,7 @@ int main(int argc, char** argv) {
     ROS_INFO("done with third trajectory");
     //xxxxxxxxxxxxxxxxxx
 
-    if (gearGoal.y - g_perceived_object_pose.pose.position.y > 0) {
+    if (gearGoalY - g_perceived_object_pose.pose.position.y > 0) {
       flange_origin << g_perceived_object_pose.pose.position.x, g_perceived_object_pose.pose.position.y + 0.1, 0.5;
     }
     else {
@@ -499,8 +500,8 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    xOffset = abs(g_perceived_object_pose.pose.position.x - gearGoal.x);
-    yOffset = abs(g_perceived_object_pose.pose.position.y - gearGoal.y);
+    xOffset = abs(g_perceived_object_pose.pose.position.x - gearGoalX);
+    yOffset = abs(g_perceived_object_pose.pose.position.y - gearGoalY);
     attempts++;
   }
 }
