@@ -172,7 +172,7 @@ int main(int argc, char** argv) {
 
     //function call from library (Class) CartTrajPlanner: converts a joint-space path to a joint-space trajectory
     pCartTrajPlanner->path_to_traj(optimal_path, arrival_time, new_trajectory);
-    print_traj(new_trajectory); //display for  debug
+    //print_traj(new_trajectory); //display for  debug
 
     traj_publisher.publish(new_trajectory); //publish the trajectory;
     ros::Duration(0.2).sleep();
@@ -258,7 +258,7 @@ int main(int argc, char** argv) {
       //choose arrival time--to  be  tuned
       arrival_time = 2.0;
       pCartTrajPlanner->path_to_traj(optimal_path, arrival_time, new_trajectory);
-      print_traj(new_trajectory);
+    //  print_traj(new_trajectory);
       traj_publisher.publish(new_trajectory); //publish the trajectory--this should move  the robot
       ros::Duration(arrival_time).sleep(); //wait for the motion to complete (dead reckoning)
       ROS_INFO("done with first trajectory");
@@ -286,7 +286,7 @@ int main(int argc, char** argv) {
       }
       //convert the path to a trajectory (adds joint-space names,  arrival times, etc)
       pCartTrajPlanner->path_to_traj(optimal_path, arrival_time, new_trajectory);
-      print_traj(new_trajectory);
+    //  print_traj(new_trajectory);
       traj_publisher.publish(new_trajectory); //publish the trajectory
       ros::Duration(arrival_time).sleep(); //wait for the motion
       ROS_INFO("done with second trajectory");
@@ -312,7 +312,7 @@ int main(int argc, char** argv) {
       }
 
       pCartTrajPlanner->path_to_traj(optimal_path, arrival_time, new_trajectory);
-      print_traj(new_trajectory);
+    //  print_traj(new_trajectory);
       traj_publisher.publish(new_trajectory); //publish the trajectory
       ros::Duration(arrival_time).sleep(); //wait for the motion
       ROS_INFO("done with third trajectory");
@@ -338,7 +338,7 @@ int main(int argc, char** argv) {
       }
 
       pCartTrajPlanner->path_to_traj(optimal_path, arrival_time, new_trajectory);
-      print_traj(new_trajectory);
+    //  print_traj(new_trajectory);
       traj_publisher.publish(new_trajectory); //publish the trajectory
       ros::Duration(arrival_time).sleep(); //wait for the motion
       ROS_INFO("done with last trajectory");
@@ -396,7 +396,7 @@ int main(int argc, char** argv) {
           //choose arrival time--to  be  tuned
           arrival_time = 2.0;
           pCartTrajPlanner->path_to_traj(optimal_path, arrival_time, new_trajectory);
-          print_traj(new_trajectory);
+        //  print_traj(new_trajectory);
           traj_publisher.publish(new_trajectory); //publish the trajectory--this should move  the robot
           ros::Duration(arrival_time).sleep(); //wait for the motion to complete (dead reckoning)
           ROS_INFO("done with first trajectory");
@@ -424,7 +424,7 @@ int main(int argc, char** argv) {
           }
           //convert the path to a trajectory (adds joint-space names,  arrival times, etc)
           pCartTrajPlanner->path_to_traj(optimal_path, arrival_time, new_trajectory);
-          print_traj(new_trajectory);
+        //  print_traj(new_trajectory);
           traj_publisher.publish(new_trajectory); //publish the trajectory
           ros::Duration(arrival_time).sleep(); //wait for the motion
           ROS_INFO("done with second trajectory");
@@ -450,7 +450,7 @@ int main(int argc, char** argv) {
           }
 
           pCartTrajPlanner->path_to_traj(optimal_path, arrival_time, new_trajectory);
-          print_traj(new_trajectory);
+        //  print_traj(new_trajectory);
           traj_publisher.publish(new_trajectory); //publish the trajectory
           ros::Duration(arrival_time).sleep(); //wait for the motion
           ROS_INFO("done with third trajectory");
@@ -476,7 +476,7 @@ int main(int argc, char** argv) {
           }
 
           pCartTrajPlanner->path_to_traj(optimal_path, arrival_time, new_trajectory);
-          print_traj(new_trajectory);
+        //  print_traj(new_trajectory);
           traj_publisher.publish(new_trajectory); //publish the trajectory
           ros::Duration(arrival_time).sleep(); //wait for the motion
           ROS_INFO("done with last trajectory");
