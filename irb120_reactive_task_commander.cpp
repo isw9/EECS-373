@@ -232,6 +232,8 @@ int main(int argc, char** argv) {
         flange_origin << g_perceived_object_pose.pose.position.x - 0.05, g_perceived_object_pose.pose.position.y, 0.5;
       }
       else {
+        ROS_INFO("X VALUE IS: %f", g_perceived_object_pose.pose.position.x);
+        ROS_INFO("Y VALUE IS: %f", g_perceived_object_pose.pose.position.y);
         flange_origin << g_perceived_object_pose.pose.position.x + 0.05, g_perceived_object_pose.pose.position.y, 0.5;
       }
       //set the  goal orientation for flange to point down; will not need to change this for now
