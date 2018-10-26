@@ -1,4 +1,4 @@
-//irb_task_commander.cpp
+//irb_reactive_task_commander.cpp
 #include <ros/ros.h>
 
 #include <cmath>
@@ -127,6 +127,7 @@ int main(int argc, char** argv) {
     g_pose_publisher = &pose_publisher;
     magic_object_finder::magicObjectFinderGoal object_finder_goal; //instantiate goal message to communicate with magic_object_finder
 
+    // THIS IS THE GOAL POSITION FOR THE GEAR PART
     double gearGoalX = 0.3;
     double gearGoalY = 0.35;
 
@@ -202,6 +203,12 @@ int main(int argc, char** argv) {
     double xOffset = abs(g_perceived_object_pose.pose.position.x - gearGoalX);
     double yOffset = abs(g_perceived_object_pose.pose.position.y - gearGoalY);
 
+
+    // This is where my code more or less starts. The basic idea is to make 6 total attempts at
+    // moving the gear (3 in the x direction and 3 in the y direction). After each x and y move, I calculate
+    // the distance between the gear and the goal position. If it is close, I stop. Otherwise, I keep going.
+    // For each attempt I have to publish 4 different trajectories to try and make the robot move smoothly.
+    // I will go into more detail on why I made this decision in my write up
     while (attempts < 3 || (xOffset > 0.05 && yOffset > 0.05)) {
       ROS_INFO("two made here");
       //xxxxxxxxxxxxxx  the following makes an inquiry for the pose of the part of interest
@@ -227,13 +234,9 @@ int main(int argc, char** argv) {
 
       goal_flange_affine.linear() = R_down;
       if (gearGoalX - g_perceived_object_pose.pose.position.x > 0) {
-        ROS_INFO("X VALUE IS: %f", g_perceived_object_pose.pose.position.x);
-        ROS_INFO("Y VALUE IS: %f", g_perceived_object_pose.pose.position.y);
         flange_origin << g_perceived_object_pose.pose.position.x - 0.05, g_perceived_object_pose.pose.position.y, 0.5;
       }
       else {
-        ROS_INFO("X VALUE IS: %f", g_perceived_object_pose.pose.position.x);
-        ROS_INFO("Y VALUE IS: %f", g_perceived_object_pose.pose.position.y);
         flange_origin << g_perceived_object_pose.pose.position.x + 0.05, g_perceived_object_pose.pose.position.y, 0.5;
       }
       //set the  goal orientation for flange to point down; will not need to change this for now
@@ -346,164 +349,164 @@ int main(int argc, char** argv) {
 
 
 
-          //xxxxxxxxxxxxxx  the following makes an inquiry for the pose of the part of interest
-          //specify the part name, send it in the goal message, wait for and interpret the result
-          object_finder_goal.object_name = g_object_name.c_str(); //convert string object to old C-style string data
-          object_finder_ac.sendGoal(object_finder_goal,&objectFinderDoneCb); //request object finding via action server
+      //xxxxxxxxxxxxxx  the following makes an inquiry for the pose of the part of interest
+      //specify the part name, send it in the goal message, wait for and interpret the result
+      object_finder_goal.object_name = g_object_name.c_str(); //convert string object to old C-style string data
+      object_finder_ac.sendGoal(object_finder_goal,&objectFinderDoneCb); //request object finding via action server
 
-          finished_before_timeout = object_finder_ac.waitForResult(ros::Duration(10.0)); //wait for a max time for response
-          //NOTE: could do something else here (if useful) while waiting for response from action server
-          if (!finished_before_timeout) {
-                  ROS_WARN("giving up waiting on result "); //this should not happen; should get result of found or not-found
-                  return 1;
-              }
-          //check the result code to see if object was found or not
-          if (g_found_object_code == magic_object_finder::magicObjectFinderResult::OBJECT_FOUND)   {
-              ROS_INFO("found object!");
-          }
-          else {
-              ROS_WARN("object not found!  Quitting");
+      finished_before_timeout = object_finder_ac.waitForResult(ros::Duration(10.0)); //wait for a max time for response
+      //NOTE: could do something else here (if useful) while waiting for response from action server
+      if (!finished_before_timeout) {
+              ROS_WARN("giving up waiting on result "); //this should not happen; should get result of found or not-found
               return 1;
           }
+      //check the result code to see if object was found or not
+      if (g_found_object_code == magic_object_finder::magicObjectFinderResult::OBJECT_FOUND)   {
+          ROS_INFO("found object!");
+      }
+      else {
+          ROS_WARN("object not found!  Quitting");
+          return 1;
+      }
 
 
-          goal_flange_affine.linear() = R_down;
-          if (gearGoalY - abs(g_perceived_object_pose.pose.position.y) > 0) {
-            flange_origin << g_perceived_object_pose.pose.position.x, g_perceived_object_pose.pose.position.y - 0.1, 0.5;
-          }
-          else {
-            flange_origin << g_perceived_object_pose.pose.position.x, g_perceived_object_pose.pose.position.y + 0.1, 0.5;
-          }
-          //set the  goal orientation for flange to point down; will not need to change this for now
-          //specify coordinates for the desired flange position (origin) with respect to the robot's base frame
-          goal_flange_affine.translation() = flange_origin; //make this part of the flange  affine description
-          ROS_INFO_STREAM("move to flange origin: " << goal_flange_affine.translation().transpose() << endl);
-          ROS_INFO_STREAM("with orientation: " << endl << goal_flange_affine.linear() << endl);
+      goal_flange_affine.linear() = R_down;
+      if (gearGoalY - abs(g_perceived_object_pose.pose.position.y) > 0) {
+        flange_origin << g_perceived_object_pose.pose.position.x, g_perceived_object_pose.pose.position.y - 0.1, 0.5;
+      }
+      else {
+        flange_origin << g_perceived_object_pose.pose.position.x, g_perceived_object_pose.pose.position.y + 0.1, 0.5;
+      }
+      //set the  goal orientation for flange to point down; will not need to change this for now
+      //specify coordinates for the desired flange position (origin) with respect to the robot's base frame
+      goal_flange_affine.translation() = flange_origin; //make this part of the flange  affine description
+      ROS_INFO_STREAM("move to flange origin: " << goal_flange_affine.translation().transpose() << endl);
+      ROS_INFO_STREAM("with orientation: " << endl << goal_flange_affine.linear() << endl);
 
-          //interpolate from start pose to goal pose with this many samples along Cartesian path
-          nsteps = 5; //arbitrary; tune me
+      //interpolate from start pose to goal pose with this many samples along Cartesian path
+      nsteps = 5; //arbitrary; tune me
 
-          //compute an optimal joint-space path:
-          optimal_path.clear();
-          //planner will return "false" if unsuccessful; should add error handling
-          //successful result will be a joint-space path in optimal_path
-          if (!pCartTrajPlanner->plan_cartesian_path_w_rot_interp(g_q_vec_arm_Xd, goal_flange_affine,
-                  nsteps, optimal_path)) {
-              ROS_WARN("no feasible IK path for specified Cartesian motion; quitting");
+      //compute an optimal joint-space path:
+      optimal_path.clear();
+      //planner will return "false" if unsuccessful; should add error handling
+      //successful result will be a joint-space path in optimal_path
+      if (!pCartTrajPlanner->plan_cartesian_path_w_rot_interp(g_q_vec_arm_Xd, goal_flange_affine,
+              nsteps, optimal_path)) {
+          ROS_WARN("no feasible IK path for specified Cartesian motion; quitting");
+          return 1;
+      }
+      //if here, have a viable joint-space path; convert it to a trajectory:
+      //choose arrival time--to  be  tuned
+      arrival_time = 2.0;
+      pCartTrajPlanner->path_to_traj(optimal_path, arrival_time, new_trajectory);
+    //  print_traj(new_trajectory);
+      traj_publisher.publish(new_trajectory); //publish the trajectory--this should move  the robot
+      ros::Duration(arrival_time).sleep(); //wait for the motion to complete (dead reckoning)
+      ROS_INFO("done with first trajectory");
+      //xxxxxxxxxxxxxxxxxx
+
+       //manually prescribed flange pose; in the  future, compute this based  on perception
+       if (gearGoalY - abs(g_perceived_object_pose.pose.position.y) > 0) {
+         flange_origin << g_perceived_object_pose.pose.position.x, g_perceived_object_pose.pose.position.y - 0.1, 0.01;
+       }
+        else {
+         flange_origin << g_perceived_object_pose.pose.position.x, g_perceived_object_pose.pose.position.y + 0.1, 0.01;
+       }
+      goal_flange_affine.translation() = flange_origin;
+      ROS_INFO_STREAM("move to flange origin: " << goal_flange_affine.translation().transpose() << endl);
+      g_q_vec_arm_Xd = optimal_path.back(); //extract the last joint-space pose from the  plan, so can use it for start of next plan
+      // better would be to get resulting joint-space values from joint_states
+      //compute an optimal Cartesian motion in joint space from current joint-space pose to desired Cartesian pose
+      optimal_path.clear();
+      nsteps = 100; //tune me
+      //compute the plan, to be returned in optimal_path
+      if (!pCartTrajPlanner->plan_cartesian_path_w_rot_interp(g_q_vec_arm_Xd, goal_flange_affine,
+              nsteps, optimal_path)) {
+        ROS_WARN("no feasible IK path for specified Cartesian motion; quitting");
+          return 1;
+      }
+      //convert the path to a trajectory (adds joint-space names,  arrival times, etc)
+      pCartTrajPlanner->path_to_traj(optimal_path, arrival_time, new_trajectory);
+    //  print_traj(new_trajectory);
+      traj_publisher.publish(new_trajectory); //publish the trajectory
+      ros::Duration(arrival_time).sleep(); //wait for the motion
+      ROS_INFO("done with second trajectory");
+      //xxxxxxxxxxxxxxxxx
+
+      if (gearGoalY - abs(g_perceived_object_pose.pose.position.y) > 0) {
+        flange_origin << g_perceived_object_pose.pose.position.x, g_perceived_object_pose.pose.position.y + 0.1, 0.01;
+      }
+      else {
+        flange_origin << g_perceived_object_pose.pose.position.x, g_perceived_object_pose.pose.position.y - 0.1, 0.01;
+      }
+      goal_flange_affine.translation() = flange_origin;
+      ROS_INFO_STREAM("move to flange origin: " << goal_flange_affine.translation().transpose() << endl);
+      g_q_vec_arm_Xd = optimal_path.back(); //start from the joint-space pose that ended the prior plan
+      //convert move to an optimal joint-space path:
+      optimal_path.clear();
+      nsteps = 100;
+
+      if (!pCartTrajPlanner->plan_cartesian_path_w_rot_interp(g_q_vec_arm_Xd, goal_flange_affine,
+              nsteps, optimal_path)) {
+          ROS_WARN("no feasible IK path for specified Cartesian motion; quitting");
+          return 1;
+      }
+
+      pCartTrajPlanner->path_to_traj(optimal_path, arrival_time, new_trajectory);
+    //  print_traj(new_trajectory);
+      traj_publisher.publish(new_trajectory); //publish the trajectory
+      ros::Duration(arrival_time).sleep(); //wait for the motion
+      ROS_INFO("done with third trajectory");
+      //xxxxxxxxxxxxxxxxxx
+
+      if (gearGoalY - abs(g_perceived_object_pose.pose.position.y) > 0) {
+        flange_origin << g_perceived_object_pose.pose.position.x, g_perceived_object_pose.pose.position.y + 0.1, 0.5;
+      }
+      else {
+        flange_origin << g_perceived_object_pose.pose.position.x, g_perceived_object_pose.pose.position.y - 0.1, 0.5;
+      }
+      goal_flange_affine.translation() = flange_origin;
+      ROS_INFO_STREAM("move to flange origin: " << goal_flange_affine.translation().transpose() << endl);
+      g_q_vec_arm_Xd = optimal_path.back();
+      //convert move to an optimal joint-space path:
+      optimal_path.clear();
+      nsteps = 100;
+
+      if (!pCartTrajPlanner->plan_cartesian_path_w_rot_interp(g_q_vec_arm_Xd, goal_flange_affine,
+              nsteps, optimal_path)) {
+          ROS_WARN("no feasible IK path for specified Cartesian motion; quitting");
+          return 1;
+      }
+
+      pCartTrajPlanner->path_to_traj(optimal_path, arrival_time, new_trajectory);
+    //  print_traj(new_trajectory);
+      traj_publisher.publish(new_trajectory); //publish the trajectory
+      ros::Duration(arrival_time).sleep(); //wait for the motion
+      ROS_INFO("done with last trajectory");
+
+
+      //xxxxxxxxxxxxxx  the following makes an inquiry for the pose of the part of interest
+      //specify the part name, send it in the goal message, wait for and interpret the result
+      object_finder_goal.object_name = g_object_name.c_str(); //convert string object to old C-style string data
+      object_finder_ac.sendGoal(object_finder_goal,&objectFinderDoneCb); //request object finding via action server
+
+      finished_before_timeout = object_finder_ac.waitForResult(ros::Duration(10.0)); //wait for a max time for response
+      //NOTE: could do something else here (if useful) while waiting for response from action server
+      if (!finished_before_timeout) {
+              ROS_WARN("giving up waiting on result "); //this should not happen; should get result of found or not-found
               return 1;
           }
-          //if here, have a viable joint-space path; convert it to a trajectory:
-          //choose arrival time--to  be  tuned
-          arrival_time = 2.0;
-          pCartTrajPlanner->path_to_traj(optimal_path, arrival_time, new_trajectory);
-        //  print_traj(new_trajectory);
-          traj_publisher.publish(new_trajectory); //publish the trajectory--this should move  the robot
-          ros::Duration(arrival_time).sleep(); //wait for the motion to complete (dead reckoning)
-          ROS_INFO("done with first trajectory");
-          //xxxxxxxxxxxxxxxxxx
+      //check the result code to see if object was found or not
+      if (g_found_object_code == magic_object_finder::magicObjectFinderResult::OBJECT_FOUND)   {
+          ROS_INFO("found object!");
+      }
+      else {
+          ROS_WARN("object not found!  Quitting");
+          return 1;
+      }
 
-           //manually prescribed flange pose; in the  future, compute this based  on perception
-           if (gearGoalY - abs(g_perceived_object_pose.pose.position.y) > 0) {
-             flange_origin << g_perceived_object_pose.pose.position.x, g_perceived_object_pose.pose.position.y - 0.1, 0.01;
-           }
-           else {
-             flange_origin << g_perceived_object_pose.pose.position.x, g_perceived_object_pose.pose.position.y + 0.1, 0.01;
-           }
-          goal_flange_affine.translation() = flange_origin;
-          ROS_INFO_STREAM("move to flange origin: " << goal_flange_affine.translation().transpose() << endl);
-          g_q_vec_arm_Xd = optimal_path.back(); //extract the last joint-space pose from the  plan, so can use it for start of next plan
-          // better would be to get resulting joint-space values from joint_states
-          //compute an optimal Cartesian motion in joint space from current joint-space pose to desired Cartesian pose
-          optimal_path.clear();
-          nsteps = 100; //tune me
-          //compute the plan, to be returned in optimal_path
-          if (!pCartTrajPlanner->plan_cartesian_path_w_rot_interp(g_q_vec_arm_Xd, goal_flange_affine,
-                  nsteps, optimal_path)) {
-              ROS_WARN("no feasible IK path for specified Cartesian motion; quitting");
-              return 1;
-          }
-          //convert the path to a trajectory (adds joint-space names,  arrival times, etc)
-          pCartTrajPlanner->path_to_traj(optimal_path, arrival_time, new_trajectory);
-        //  print_traj(new_trajectory);
-          traj_publisher.publish(new_trajectory); //publish the trajectory
-          ros::Duration(arrival_time).sleep(); //wait for the motion
-          ROS_INFO("done with second trajectory");
-          //xxxxxxxxxxxxxxxxx
-
-          if (gearGoalY - abs(g_perceived_object_pose.pose.position.y) > 0) {
-            flange_origin << g_perceived_object_pose.pose.position.x, g_perceived_object_pose.pose.position.y + 0.1, 0.01;
-          }
-          else {
-            flange_origin << g_perceived_object_pose.pose.position.x, g_perceived_object_pose.pose.position.y - 0.1, 0.01;
-          }
-          goal_flange_affine.translation() = flange_origin;
-          ROS_INFO_STREAM("move to flange origin: " << goal_flange_affine.translation().transpose() << endl);
-          g_q_vec_arm_Xd = optimal_path.back(); //start from the joint-space pose that ended the prior plan
-          //convert move to an optimal joint-space path:
-          optimal_path.clear();
-          nsteps = 100;
-
-          if (!pCartTrajPlanner->plan_cartesian_path_w_rot_interp(g_q_vec_arm_Xd, goal_flange_affine,
-                  nsteps, optimal_path)) {
-              ROS_WARN("no feasible IK path for specified Cartesian motion; quitting");
-              return 1;
-          }
-
-          pCartTrajPlanner->path_to_traj(optimal_path, arrival_time, new_trajectory);
-        //  print_traj(new_trajectory);
-          traj_publisher.publish(new_trajectory); //publish the trajectory
-          ros::Duration(arrival_time).sleep(); //wait for the motion
-          ROS_INFO("done with third trajectory");
-          //xxxxxxxxxxxxxxxxxx
-
-          if (gearGoalY - abs(g_perceived_object_pose.pose.position.y) > 0) {
-            flange_origin << g_perceived_object_pose.pose.position.x, g_perceived_object_pose.pose.position.y + 0.1, 0.5;
-          }
-          else {
-            flange_origin << g_perceived_object_pose.pose.position.x, g_perceived_object_pose.pose.position.y - 0.1, 0.5;
-          }
-          goal_flange_affine.translation() = flange_origin;
-          ROS_INFO_STREAM("move to flange origin: " << goal_flange_affine.translation().transpose() << endl);
-          g_q_vec_arm_Xd = optimal_path.back();
-          //convert move to an optimal joint-space path:
-          optimal_path.clear();
-          nsteps = 100;
-
-          if (!pCartTrajPlanner->plan_cartesian_path_w_rot_interp(g_q_vec_arm_Xd, goal_flange_affine,
-                  nsteps, optimal_path)) {
-              ROS_WARN("no feasible IK path for specified Cartesian motion; quitting");
-              return 1;
-          }
-
-          pCartTrajPlanner->path_to_traj(optimal_path, arrival_time, new_trajectory);
-        //  print_traj(new_trajectory);
-          traj_publisher.publish(new_trajectory); //publish the trajectory
-          ros::Duration(arrival_time).sleep(); //wait for the motion
-          ROS_INFO("done with last trajectory");
-
-
-          //xxxxxxxxxxxxxx  the following makes an inquiry for the pose of the part of interest
-          //specify the part name, send it in the goal message, wait for and interpret the result
-          object_finder_goal.object_name = g_object_name.c_str(); //convert string object to old C-style string data
-          object_finder_ac.sendGoal(object_finder_goal,&objectFinderDoneCb); //request object finding via action server
-
-          finished_before_timeout = object_finder_ac.waitForResult(ros::Duration(10.0)); //wait for a max time for response
-          //NOTE: could do something else here (if useful) while waiting for response from action server
-          if (!finished_before_timeout) {
-                  ROS_WARN("giving up waiting on result "); //this should not happen; should get result of found or not-found
-                  return 1;
-              }
-          //check the result code to see if object was found or not
-          if (g_found_object_code == magic_object_finder::magicObjectFinderResult::OBJECT_FOUND)   {
-              ROS_INFO("found object!");
-          }
-          else {
-              ROS_WARN("object not found!  Quitting");
-              return 1;
-          }
-
-          xOffset = abs(g_perceived_object_pose.pose.position.x - gearGoalX);
-          yOffset = abs(g_perceived_object_pose.pose.position.y - gearGoalY);
-          attempts++;
+      xOffset = abs(g_perceived_object_pose.pose.position.x - gearGoalX);
+      yOffset = abs(g_perceived_object_pose.pose.position.y - gearGoalY);
+      attempts++;
     }
 }
