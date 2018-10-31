@@ -29,8 +29,8 @@ int main(int argc, char **argv) {
     std_srvs::Trigger startup_srv;
     ros::ServiceClient conveyor_client = n.serviceClient<osrf_gear::ConveyorBeltControl>("/ariac/conveyor/control");
     osrf_gear::ConveyorBeltControl conveyor_srv;
-    ros::ServiceClient drone_client = n.serviceClient<osrf_gear::DrontControl>("/ariac/drone");
-    osrf_gear::DrontControl drone_srv;
+    ros::ServiceClient drone_client = n.serviceClient<osrf_gear::DroneControl>("/ariac/drone");
+    osrf_gear::DroneControl drone_srv;
 
     ros::Subscriber cam2_subscriber = n.subscribe("/ariac/logical_camera_two",1,camera_twoCB);
 
