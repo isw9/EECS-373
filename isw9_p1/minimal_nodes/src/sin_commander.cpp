@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
     while (ros::ok()) {
       	//sinusoidal velocity calculation
         double x = amplitude * cos(2 * 3.14 * frequency * time_elapsed);
-        g_velocity.data = 2 * 3.14 * frequency * sqrt((amplitude * amplitude) - (x * x));
+        g_velocity.data = x;
         my_publisher_object.publish(g_velocity); // publish the system state
 	      my_publisher_object_two.publish(g_force);
         ROS_INFO("commanded velocity = %f", g_velocity.data);
