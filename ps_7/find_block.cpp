@@ -10,9 +10,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <geometry_msgs/PoseStamped.h>
-
 #include <xform_utils/xform_utils.h>
-#include <cmath>
 
 static const std::string OPENCV_WINDOW = "Open-CV display window";
 using namespace std;
@@ -26,7 +24,7 @@ class ImageConverter {
     image_transport::ImageTransport it_;
     image_transport::Subscriber image_sub_;
     image_transport::Publisher image_pub_;
-    ros::Publisher block_pose_publisher_;// = n.advertise<std_msgs::Float64>("opencv_coords", 1);
+    ros::Publisher block_pose_publisher_; // = n.advertise<std_msgs::Float64>("topic1", 1);
     geometry_msgs::PoseStamped block_pose_;
     XformUtils xformUtils;
 
@@ -38,17 +36,17 @@ public:
         image_sub_ = it_.subscribe("simple_camera/image_raw", 1,
                 &ImageConverter::imageCb, this);
         image_pub_ = it_.advertise("/image_converter/output_video", 1);
-        block_pose_publisher_ = nh_.advertise<geometry_msgs::PoseStamped>("block_pose", 1, true); 
+        block_pose_publisher_ = nh_.advertise<geometry_msgs::PoseStamped>("block_pose", 1, true);
         block_pose_.header.frame_id = "world"; //specify the  block pose in world coords
         block_pose_.pose.position.z = BLOCK_HEIGHT;
         block_pose_.pose.position.x = 0.5; //not true, but legal
         block_pose_.pose.position.y = 0.0; //not true, but legal
-        
+
         // need camera info to fill in x,y,and orientation x,y,z,w
         //geometry_msgs::Quaternion quat_est
         //quat_est = xformUtils.convertPlanarPsi2Quaternion(yaw_est);
         block_pose_.pose.orientation = xformUtils.convertPlanarPsi2Quaternion(0); //not true, but legal
-        
+
         cv::namedWindow(OPENCV_WINDOW);
     }
 
@@ -57,8 +55,8 @@ public:
     }
 
     //image comes in as a ROS message, but gets converted to an OpenCV type
-    void imageCb(const sensor_msgs::ImageConstPtr& msg); 
-    
+    void imageCb(const sensor_msgs::ImageConstPtr& msg);
+
 }; //end of class definition
 
 void ImageConverter::imageCb(const sensor_msgs::ImageConstPtr& msg){
@@ -110,12 +108,12 @@ void ImageConverter::imageCb(const sensor_msgs::ImageConstPtr& msg){
             j_centroid = jsum / npix; // avg v component
             x_centroid = ((double) isum)/((double) npix); //floating-pt version
             y_centroid = ((double) jsum)/((double) npix);
-	    //  ROS_INFO("u_avg: %f; v_avg: %f",x_centroid,y_centroid);
+            ROS_INFO("u_avg: %f; v_avg: %f",x_centroid,y_centroid);
             //cout << "i_avg: " << i_centroid << endl; //i,j centroid of red pixels
             //cout << "j_avg: " << j_centroid << endl;
             for (int i_box = i_centroid - half_box; i_box <= i_centroid + half_box; i_box++) {
                 for (int j_box = j_centroid - half_box; j_box <= j_centroid + half_box; j_box++) {
-                    //make sure indices fit within the image 
+                    //make sure indices fit within the image
                     if ((i_box >= 0)&&(j_box >= 0)&&(i_box < cv_ptr->image.cols)&&(j_box < cv_ptr->image.rows)) {
                         cv_ptr->image.at<cv::Vec3b>(j_box, i_box)[0] = 255; //(255,0,0) is pure blue
                         cv_ptr->image.at<cv::Vec3b>(j_box, i_box)[1] = 0;
@@ -130,32 +128,24 @@ void ImageConverter::imageCb(const sensor_msgs::ImageConstPtr& msg){
         cv::waitKey(3); //need waitKey call to update OpenCV image window
 
         // Also, publish the processed image as a ROS message on a ROS topic
-        // can view this stream in ROS with: 
+        // can view this stream in ROS with:
         //rosrun image_view image_view image:=/image_converter/output_video
         image_pub_.publish(cv_ptr->toImageMsg());
-	double scale = (1.0/346.0);
-	double x_normalized = (x_centroid - 320) * scale;
-	double y_normalized = (y_centroid -240) * scale;
-	double theta = .206;
-	double x = cos(theta) * x_normalized - sin(theta) * y_normalized + .543;
-	double y = -1*(sin(theta)*x_normalized + cos(theta)*y_normalized - .321);
-	
-	block_pose_.pose.position.x = x;
-	block_pose_.pose.position.y = y;
-       	ROS_INFO("u  is: %f", x_normalized);
-      	ROS_INFO("v  is: %f", y_normalized);
-	ROS_INFO("x  position of block from robot is: %f", block_pose_.pose.position.x);
-        ROS_INFO("y  position of block from robot is: %f", block_pose_.pose.position.y);
+
+        block_pose_.pose.position.x = i_centroid; //not true, but legal
+        block_pose_.pose.position.y = j_centroid; //not true, but legal
+        double theta=0;
+
         // need camera info to fill in x,y,and orientation x,y,z,w
         //geometry_msgs::Quaternion quat_est
         //quat_est = xformUtils.convertPlanarPsi2Quaternion(yaw_est);
-        block_pose_.pose.orientation = xformUtils.convertPlanarPsi2Quaternion(theta);
+        block_pose_.pose.orientation = xformUtils.convertPlanarPsi2Quaternion(theta); //not true, but legal
         block_pose_publisher_.publish(block_pose_);
     }
 
 int main(int argc, char** argv) {
     ros::init(argc, argv, "red_pixel_finder");
-    ros::NodeHandle n; //        
+    ros::NodeHandle n; //
     ImageConverter ic(n); // instantiate object of class ImageConverter
     //cout << "enter red ratio threshold: (e.g. 10) ";
     //cin >> g_redratio;
